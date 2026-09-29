@@ -376,6 +376,9 @@ textarea:focus {
   text-align: center;
   border-radius: 10px !important;
   border: none !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .site-menu .nav-home-link:hover {
@@ -389,9 +392,16 @@ textarea:focus {
 }
 
 .site-menu .nav-home-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  line-height: 0;
+  color: #fff;
+}
+
+.site-menu .nav-home-icon svg {
   display: block;
-  margin-top: -2px;
-  margin-bottom: 0;
 }
 
 .site-menu-has-sub:after {
@@ -811,10 +821,19 @@ a.back-to-top:hover {
 .search-wrap .search-icon {
   position: absolute;
   inset-inline-start: 12px;
+  top: 50%;
+  transform: translateY(-50%);
   color: #0f4c3a;
-  font-size: 1.15rem;
   pointer-events: none;
   z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+}
+
+.search-wrap .search-icon svg {
+  display: block;
 }
 
 .search-form {

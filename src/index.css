@@ -1,8 +1,13 @@
 /** @format */
 
-* {
+*:not(.typcn):not([class*=" typcn"]) {
   font-family: "Tajawal", "Segoe UI", Tahoma, "Noto Sans Arabic", Arial,
     sans-serif;
+}
+
+.typcn:before,
+[class*="typcn-"]:before {
+  font-family: "typicons" !important;
 }
 
 html {

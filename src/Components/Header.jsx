@@ -144,7 +144,18 @@ function Header() {
                   className={`nav-home-link ${getActiveClass("/")}`}
                   aria-label='الرئيسية'
                   title='الرئيسية'>
-                  <span className='typcn typcn-large typcn-home nav-home-icon'></span>
+                  <span className='nav-home-icon' aria-hidden='true'>
+                    <svg
+                      viewBox='0 0 24 24'
+                      width='22'
+                      height='22'
+                      focusable='false'>
+                      <path
+                        fill='currentColor'
+                        d='M12 3 3 10.5V20a1 1 0 0 0 1 1h5v-6h6v6h5a1 1 0 0 0 1-1v-9.5L12 3Z'
+                      />
+                    </svg>
+                  </span>
                   <span className='sr-only'>الرئيسية</span>
                 </Link>
               </li>
