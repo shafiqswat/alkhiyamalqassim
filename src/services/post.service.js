@@ -1,6 +1,5 @@
 /** @format */
 
-import { firestore } from "../lib/firebaseConfig";
 import {
   addDoc,
   collection,
@@ -13,19 +12,20 @@ import {
   serverTimestamp,
   updateDoc,
 } from "firebase/firestore";
+import { getFirestoreDb } from "../lib/firebaseConfig";
 import { getCurrentUser, isOwner } from "./user.service";
 
 const POSTS_COLLECTION = "posts";
 
-// Defer collection reference to call time to avoid accessing firestore during SSG/SSR
-const getPostsCollection = () => {
+const getPostsCollection = async () => {
+  const firestore = await getFirestoreDb();
   if (!firestore)
     throw new Error("Firestore is not available in this environment");
   return collection(firestore, POSTS_COLLECTION);
 };
 
-const assertOwner = () => {
-  const user = getCurrentUser();
+const assertOwner = async () => {
+  const user = await getCurrentUser();
   if (!isOwner(user)) {
     const error = new Error("غير مصرح: يجب تسجيل دخول المالك");
     error.code = "auth/not-owner";
@@ -34,27 +34,31 @@ const assertOwner = () => {
 };
 
 export const createPost = async (post) => {
-  assertOwner();
+  await assertOwner();
   const payload = {
     title: post.title || "",
     span: post.span || "",
     imageUrl: post.imageUrl || "",
     description: post.description || "",
+    imageAlt: post.imageAlt || "",
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   };
-  const ref = await addDoc(getPostsCollection(), payload);
+  const col = await getPostsCollection();
+  const ref = await addDoc(col, payload);
   const snapshot = await getDoc(ref);
   return { id: ref.id, ...snapshot.data() };
 };
 
 export const listPosts = async () => {
-  const q = query(getPostsCollection(), orderBy("createdAt", "desc"));
+  const col = await getPostsCollection();
+  const q = query(col, orderBy("createdAt", "desc"));
   const snap = await getDocs(q);
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
 };
 
 export const getPost = async (id) => {
+  const firestore = await getFirestoreDb();
   if (!firestore)
     throw new Error("Firestore is not available in this environment");
   const ref = doc(firestore, POSTS_COLLECTION, id);
@@ -64,7 +68,8 @@ export const getPost = async (id) => {
 };
 
 export const updatePost = async (id, updates) => {
-  assertOwner();
+  await assertOwner();
+  const firestore = await getFirestoreDb();
   if (!firestore)
     throw new Error("Firestore is not available in this environment");
   const ref = doc(firestore, POSTS_COLLECTION, id);
@@ -74,7 +79,8 @@ export const updatePost = async (id, updates) => {
 };
 
 export const deletePostById = async (id) => {
-  assertOwner();
+  await assertOwner();
+  const firestore = await getFirestoreDb();
   if (!firestore)
     throw new Error("Firestore is not available in this environment");
   const ref = doc(firestore, POSTS_COLLECTION, id);

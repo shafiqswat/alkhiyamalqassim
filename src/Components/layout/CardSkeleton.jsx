@@ -1,15 +1,6 @@
 /** @format */
 import React from "react";
-import styled, { keyframes } from "styled-components";
-
-const shimmer = keyframes`
-  0% {
-    background-position: -200px 0;
-  }
-  100% {
-    background-position: calc(200px + 100%) 0;
-  }
-`;
+import styled from "styled-components";
 
 const CardSkeleton = () => {
   return (
@@ -22,9 +13,6 @@ const CardSkeleton = () => {
           <div className='skeletonSpan'></div>
         </div>
         <div className='titleContent'>
-          <div className='titleIcon'>
-            <div className='skeletonShare'></div>
-          </div>
           <div className='title'>
             <div className='skeletonTitle'></div>
             <div className='skeletonTitleLine'></div>
@@ -44,108 +32,53 @@ const SkeletonContainer = styled.div`
   .cardContent {
     max-width: 97%;
     margin: 0 0 3% 0;
-    height: fit-content;
     background: #ffffff !important;
     box-shadow: 0px 0px 5px #969696;
     line-height: 1.4;
   }
 
   .imageWrapper {
-    position: relative;
     overflow: hidden;
 
     .skeletonImage {
       width: 100%;
       height: 200px;
-      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-      background-size: 200px 100%;
-      animation: ${shimmer} 1.5s infinite;
+      background: #e8e4dc;
     }
   }
 
   .cardTitle {
-    padding: 10px 1.5% 10px 1.5%;
+    padding: 10px 1.5%;
     height: 40px;
-    z-index: 3;
-    position: relative;
-    color: #fff;
     margin-top: -40px;
-    background: rgba(0, 0, 0, 0.5);
+    position: relative;
+    z-index: 3;
+    background: rgba(0, 0, 0, 0.45);
 
     .skeletonSpan {
       height: 16px;
       width: 60%;
-      background: linear-gradient(90deg, #ccc 25%, #bbb 50%, #ccc 75%);
-      background-size: 200px 100%;
-      animation: ${shimmer} 1.5s infinite;
+      background: rgba(255, 255, 255, 0.35);
       border-radius: 4px;
     }
   }
 
   .titleContent {
-    display: flex;
-    flex-direction: row-reverse;
-    flex-wrap: wrap;
-
-    .titleIcon {
-      font-size: 1.5em;
-      position: relative;
-      padding: 0 5px;
-      opacity: 0.9;
-      z-index: 5;
-      text-align: center;
-      height: 40px;
-      margin-top: -60px;
-
-      .skeletonShare {
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        background: linear-gradient(90deg, #ccc 25%, #bbb 50%, #ccc 75%);
-        background-size: 200px 100%;
-        animation: ${shimmer} 1.5s infinite;
-        margin-top: 1em;
-      }
-    }
-
     .title {
-      color: #000000;
       padding: 10px;
       height: 60px;
-      text-align: justify;
 
-      .skeletonTitle {
-        height: 18px;
+      .skeletonTitle,
+      .skeletonTitleLine {
+        height: 14px;
         width: 90%;
-        background: linear-gradient(
-          90deg,
-          #f0f0f0 25%,
-          #e0e0e0 50%,
-          #f0f0f0 75%
-        );
-        background-size: 200px 100%;
-        animation: ${shimmer} 1.5s infinite;
+        background: #ebe7df;
         border-radius: 4px;
         margin-bottom: 8px;
       }
 
-      .skeletonTitleLine {
-        height: 16px;
-        width: 100%;
-        background: linear-gradient(
-          90deg,
-          #f0f0f0 25%,
-          #e0e0e0 50%,
-          #f0f0f0 75%
-        );
-        background-size: 200px 100%;
-        animation: ${shimmer} 1.5s infinite;
-        border-radius: 4px;
-        margin-bottom: 6px;
-
-        &.short {
-          width: 70%;
-        }
+      .skeletonTitleLine.short {
+        width: 70%;
       }
     }
   }

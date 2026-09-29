@@ -11,7 +11,7 @@ function CardComponent({ item, hideImage = false, priority = false }) {
   const textToShare = encodeURIComponent(item.cardTitle || "");
   const urlToShare = encodeURIComponent(currentUrl);
   const router = useRouter();
-  const imageSrc = optimizeImageUrl(item.cardImage, { width: 480, height: 320 });
+  const imageSrc = optimizeImageUrl(item.cardImage, { width: 400, height: 280 });
 
   const handleClick = () => {
     router.push(`/product/${item.id}`);
@@ -56,11 +56,11 @@ function CardComponent({ item, hideImage = false, priority = false }) {
                   item.cardTitle ||
                   "الخيام القصيم - مظلات وسواتر"
                 }
-                width={480}
-                height={320}
-                loading={priority ? "eager" : "lazy"}
+                width={400}
+                height={280}
+                loading='lazy'
                 decoding='async'
-                fetchPriority={priority ? "high" : "low"}
+                fetchPriority='low'
               />
               <div className='imageOverlay' />
             </div>

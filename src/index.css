@@ -1,11 +1,14 @@
 /** @format */
 
+/* System fonts first for fast FCP; Tajawal applies when deferred CSS loads */
 * {
-  font-family: "Tajawal", "Segoe UI", Tahoma, sans-serif;
+  font-family: "Tajawal", "Segoe UI", Tahoma, "Noto Sans Arabic", Arial,
+    sans-serif;
 }
 
 html {
   scroll-behavior: smooth;
+  text-size-adjust: 100%;
 }
 
 body {
@@ -29,5 +32,15 @@ img {
   *::after {
     animation: none !important;
     transition: none !important;
+  }
+}
+
+/* Kill expensive animations on narrow / slow phones */
+@media (max-width: 768px) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
   }
 }

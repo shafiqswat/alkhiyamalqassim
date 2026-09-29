@@ -10,12 +10,12 @@ import { usePosts } from "../src/Context/postContext";
 import { siteConfig } from "../src/lib/siteConfig";
 import { optimizeImageUrl } from "../src/helpers/optimizeImage";
 
-const Slider = dynamic(() => import("../src/Components/layout/slider"), {
+const Slider = dynamic(() => import("../src/Components/layout/LazySlider"), {
   ssr: false,
   loading: () => <SliderPlaceholder aria-hidden='true' />,
 });
 
-const PAGE_SIZE = 12;
+const PAGE_SIZE = 6;
 
 export default function Page() {
   const { posts, loading } = usePosts();
@@ -60,7 +60,7 @@ export default function Page() {
         <section aria-label='منتجاتنا'>
           {!mounted || loading ? (
             <>
-              {Array.from({ length: 6 }).map((_, index) => (
+              {Array.from({ length: 4 }).map((_, index) => (
                 <CardSkeleton key={index} />
               ))}
             </>
@@ -69,12 +69,12 @@ export default function Page() {
               {shown.map((item, index) => (
                 <CardComponent
                   key={item.id || index}
-                  priority={index < 3}
+                  priority={false}
                   item={{
                     id: item.id,
                     cardImage: optimizeImageUrl(item.imageUrl, {
-                      width: 480,
-                      height: 320,
+                      width: 400,
+                      height: 280,
                     }),
                     cardTitle: item.title,
                     cardSpan: item.span,

@@ -3,6 +3,7 @@
     font-family: 'typicons';
     font-weight: normal;
     font-style: normal;
+    font-display: optional;
     src: url('typicons.eot');
     src: url('typicons.eot?#iefix') format('embedded-opentype'), url('typicons.woff') format('woff'), url('typicons.ttf') format('truetype'), url('typicons.svg#typicons') format('svg')
 }

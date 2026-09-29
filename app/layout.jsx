@@ -15,6 +15,7 @@ import { UserProvider } from "../src/Context/userContext";
 import { PostProvider } from "../src/Context/postContext";
 import { siteConfig } from "../src/lib/siteConfig";
 import { initAnalyticsDeferred } from "../src/lib/firebaseConfig";
+import DeferredStyles from "../src/Components/DeferredStyles";
 
 const LazyMap = dynamic(() => import("../src/Components/LazyMap"), {
   ssr: false,
@@ -113,15 +114,6 @@ export default function RootLayout({ children }) {
         />
         <link
           rel='preconnect'
-          href='https://fonts.googleapis.com'
-        />
-        <link
-          rel='preconnect'
-          href='https://fonts.gstatic.com'
-          crossOrigin='anonymous'
-        />
-        <link
-          rel='preconnect'
           href='https://res.cloudinary.com'
           crossOrigin='anonymous'
         />
@@ -129,16 +121,18 @@ export default function RootLayout({ children }) {
           rel='dns-prefetch'
           href='https://firestore.googleapis.com'
         />
-        <link
-          href='https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=swap'
-          rel='stylesheet'
+        {/* Non-blocking font: swap after idle — system stack paints first */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){function l(){var a=document.createElement('link');a.rel='stylesheet';a.href='https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=optional';a.media='print';a.onload=function(){this.media='all'};document.head.appendChild(a)}if(window.requestIdleCallback)requestIdleCallback(l,{timeout:3000});else setTimeout(l,1)})();`,
+          }}
         />
-        <link
-          rel='preload'
-          as='image'
-          href='/images/slider3.webp'
-          type='image/webp'
-        />
+        <noscript>
+          <link
+            href='https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=optional'
+            rel='stylesheet'
+          />
+        </noscript>
         <meta
           property='og:locale'
           content='ar_SA'
@@ -161,7 +155,7 @@ export default function RootLayout({ children }) {
         />
         <meta
           property='og:image'
-          content={`${domain}/images/slider3.jpg`}
+          content={`${domain}/images/slider3.webp`}
         />
         <meta
           property='og:url'
@@ -181,11 +175,7 @@ export default function RootLayout({ children }) {
         />
         <meta
           name='twitter:image'
-          content={`${domain}/images/slider3.jpg`}
-        />
-        <link
-          rel='stylesheet'
-          href='/font%20icons/typicons.min.css'
+          content={`${domain}/images/slider3.webp`}
         />
         <script
           type='application/ld+json'
@@ -271,6 +261,7 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body>
+        <DeferredStyles />
         <SearchProvider>
           <UserProvider>
             <PostProvider>

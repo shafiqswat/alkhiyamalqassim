@@ -42,15 +42,21 @@ export const PostProvider = ({ children }) => {
     const start = () => {
       if (!cancelled) refresh();
     };
-    // Defer Firestore off the critical rendering path
+    // Defer Firestore further on mobile so FCP/LCP aren't blocked
+    const isMobile =
+      typeof window !== "undefined" && window.matchMedia("(max-width: 768px)").matches;
+    const delay = isMobile ? 2200 : 400;
+
     if (typeof window !== "undefined" && "requestIdleCallback" in window) {
-      const id = window.requestIdleCallback(start, { timeout: 1800 });
+      const id = window.requestIdleCallback(start, {
+        timeout: isMobile ? 3200 : 1800,
+      });
       return () => {
         cancelled = true;
         window.cancelIdleCallback?.(id);
       };
     }
-    const t = setTimeout(start, 200);
+    const t = setTimeout(start, delay);
     return () => {
       cancelled = true;
       clearTimeout(t);

@@ -7,6 +7,7 @@ import React, {
   useMemo,
   useState,
 } from "react";
+import { usePathname } from "next/navigation";
 import {
   isOwner as isOwnerUtil,
   onAuthStateChangedListener,
@@ -23,16 +24,26 @@ const UserContext = createContext({
 });
 
 export const UserProvider = ({ children }) => {
+  const pathname = usePathname();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const needsAuth = pathname?.startsWith("/admin");
 
   useEffect(() => {
+    // Public pages: never load Firebase Auth (saves ~93KB iframe on mobile)
+    if (!needsAuth) {
+      setUser(null);
+      setLoading(false);
+      return undefined;
+    }
+
+    setLoading(true);
     const unsubscribe = onAuthStateChangedListener((firebaseUser) => {
       setUser(firebaseUser);
       setLoading(false);
     });
     return unsubscribe;
-  }, []);
+  }, [needsAuth]);
 
   const loginOwner = async (email, password) => {
     setLoading(true);

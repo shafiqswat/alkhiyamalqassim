@@ -1,8 +1,6 @@
 /** @format */
 
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -16,15 +14,46 @@ const firebaseConfig = {
 
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 
-export const auth = typeof window !== "undefined" ? getAuth(app) : null;
+let _firestore = null;
+let _auth = null;
 
-export const firestore =
-  typeof window !== "undefined" ? getFirestore(app) : null;
+export const getFirestoreDb = async () => {
+  if (typeof window === "undefined") return null;
+  if (_firestore) return _firestore;
+  const { getFirestore } = await import("firebase/firestore");
+  _firestore = getFirestore(app);
+  return _firestore;
+};
 
-/** Analytics only after idle — never on critical path */
+/** Auth ONLY for /admin — never init on public pages (avoids auth iframe ~93KB) */
+export const getFirebaseAuth = async () => {
+  if (typeof window === "undefined") return null;
+  if (_auth) return _auth;
+  const { getAuth } = await import("firebase/auth");
+  _auth = getAuth(app);
+  return _auth;
+};
+
+export const firestore = null;
+export const auth = null;
+
+/**
+ * Analytics after interaction or long idle. Skip on Save-Data / 2G.
+ */
 export function initAnalyticsDeferred() {
   if (typeof window === "undefined") return;
+
+  const conn =
+    navigator.connection ||
+    navigator.mozConnection ||
+    navigator.webkitConnection;
+  if (conn?.saveData) return;
+  if (conn?.effectiveType && /2g/.test(conn.effectiveType)) return;
+
+  let done = false;
   const run = () => {
+    if (done) return;
+    done = true;
     import("firebase/analytics")
       .then(({ getAnalytics, isSupported }) =>
         isSupported().then((ok) => {
@@ -33,10 +62,27 @@ export function initAnalyticsDeferred() {
       )
       .catch(() => {});
   };
+
+  const onInteract = () => {
+    cleanup();
+    setTimeout(run, 2500);
+  };
+  const cleanup = () => {
+    window.removeEventListener("scroll", onInteract);
+    window.removeEventListener("pointerdown", onInteract);
+    window.removeEventListener("keydown", onInteract);
+  };
+
+  window.addEventListener("scroll", onInteract, { passive: true, once: true });
+  window.addEventListener("pointerdown", onInteract, { once: true });
+  window.addEventListener("keydown", onInteract, { once: true });
+
   if ("requestIdleCallback" in window) {
-    window.requestIdleCallback(run, { timeout: 5000 });
+    window.requestIdleCallback(() => setTimeout(run, 12000), {
+      timeout: 20000,
+    });
   } else {
-    setTimeout(run, 4000);
+    setTimeout(run, 15000);
   }
 }
 

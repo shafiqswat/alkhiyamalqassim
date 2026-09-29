@@ -1,19 +1,18 @@
 /** @format */
 
-import { auth } from "../lib/firebaseConfig";
-
 const OWNER_EMAIL = process.env.NEXT_PUBLIC_OWNER_EMAIL;
 
 export const isOwner = (user) => {
   if (!user) return false;
-  // If no owner email configured, treat any signed-in user as owner
   if (!OWNER_EMAIL) return true;
   return user.email === OWNER_EMAIL;
 };
 
 export const signInOwner = async (email, password) => {
+  const { getFirebaseAuth } = await import("../lib/firebaseConfig");
+  const auth = await getFirebaseAuth();
   if (!auth) throw new Error("Auth is not available in this environment");
-  const { signInWithEmailAndPassword } = await import("firebase/auth");
+  const { signInWithEmailAndPassword, signOut } = await import("firebase/auth");
   let credential;
   try {
     credential = await signInWithEmailAndPassword(auth, email, password);
@@ -32,7 +31,6 @@ export const signInOwner = async (email, password) => {
   }
   const user = credential.user;
   if (!isOwner(user)) {
-    // Immediately sign out non-owner accounts for safety
     await signOut(auth);
     const error = new Error("Unauthorized: Not the site owner");
     error.code = "auth/not-owner";
@@ -42,34 +40,45 @@ export const signInOwner = async (email, password) => {
 };
 
 export const signOutUser = async () => {
+  const { getFirebaseAuth } = await import("../lib/firebaseConfig");
+  const auth = await getFirebaseAuth();
   if (!auth) return;
   const { signOut } = await import("firebase/auth");
   await signOut(auth);
 };
 
 export const onAuthStateChangedListener = (callback) => {
-  if (!auth) {
-    // Auth disabled: immediately unblock UI and report no user
-    try {
-      callback(null);
-    } catch (_) {}
-    return () => {};
-  }
-  // Always return a sync cleanup function; populate it once import resolves
   let unsubscribe = () => {};
-  import("firebase/auth").then(({ onAuthStateChanged }) => {
+  let cancelled = false;
+
+  (async () => {
     try {
+      const { getFirebaseAuth } = await import("../lib/firebaseConfig");
+      const auth = await getFirebaseAuth();
+      if (!auth || cancelled) {
+        callback(null);
+        return;
+      }
+      const { onAuthStateChanged } = await import("firebase/auth");
       unsubscribe = onAuthStateChanged(auth, callback) || (() => {});
-    } catch (_) {}
-  });
+    } catch (_) {
+      callback(null);
+    }
+  })();
+
   return () => {
+    cancelled = true;
     try {
       unsubscribe();
     } catch (_) {}
   };
 };
 
-export const getCurrentUser = () => (auth ? auth.currentUser : null);
+export const getCurrentUser = async () => {
+  const { getFirebaseAuth } = await import("../lib/firebaseConfig");
+  const auth = await getFirebaseAuth();
+  return auth ? auth.currentUser : null;
+};
 
 export default {
   isOwner,
