@@ -1,0 +1,23 @@
+/** @format */
+
+* {
+  font-family: "Tajawal", "Segoe UI", Tahoma, sans-serif !important;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: #ebe4d6;
+  color: #1a2e28;
+}
+
+a {
+  transition: color 0.15s ease;
+}
+
+img {
+  max-width: 100%;
+}

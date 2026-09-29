@@ -1,0 +1,51 @@
+{
+  "name": "alkhiyamalqassim",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@testing-library/jest-dom": "^5.17.0",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^13.5.0",
+    "antd": "^5.18.3",
+    "axios": "^1.7.2",
+    "emailjs-com": "^3.2.0",
+    "firebase": "^10.12.4",
+    "leaflet": "^1.9.4",
+    "next": "^14.2.5",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-helmet": "^6.1.0",
+    "react-leaflet": "^4.2.1",
+    "react-marquee-slider": "^1.1.5",
+    "sitemap": "^8.0.0",
+    "styled-components": "^6.1.11",
+    "typicons.font": "^2.1.2",
+    "web-vitals": "^2.1.4"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "export": "next export",
+    "ingest:posts": "node scripts/ingest-posts.mjs",
+    "test": "echo 'no tests'"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
