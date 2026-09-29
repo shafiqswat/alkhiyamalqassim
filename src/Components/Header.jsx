@@ -28,6 +28,9 @@ function Header() {
     if (typeof window === "undefined") return;
 
     function calcWidth() {
+      // Moving menu items causes layout shift on mobile (hurts CLS / PageSpeed)
+      if (window.innerWidth < 992) return;
+
       const siteMenuArea = document.querySelector("#site-menu-area");
       const more = document.querySelector("#site-menu-area .more");
       const siteMenu = document.querySelector(".site-menu");
@@ -138,8 +141,11 @@ function Header() {
               <li>
                 <Link
                   href='/'
-                  className={`nav-home-link ${getActiveClass("/")}`}>
+                  className={`nav-home-link ${getActiveClass("/")}`}
+                  aria-label='الرئيسية'
+                  title='الرئيسية'>
                   <span className='typcn typcn-large typcn-home nav-home-icon'></span>
+                  <span className='sr-only'>الرئيسية</span>
                 </Link>
               </li>
               <li>

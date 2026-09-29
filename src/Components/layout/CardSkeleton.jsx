@@ -7,16 +7,13 @@ const CardSkeleton = () => {
     <SkeletonContainer>
       <div className='cardContent'>
         <div className='imageWrapper'>
-          <div className='skeletonImage'></div>
-        </div>
-        <div className='cardTitle'>
-          <div className='skeletonSpan'></div>
+          <div className='skeletonImage' />
         </div>
         <div className='titleContent'>
           <div className='title'>
-            <div className='skeletonTitle'></div>
-            <div className='skeletonTitleLine'></div>
-            <div className='skeletonTitleLine short'></div>
+            <div className='skeletonTitle' />
+            <div className='skeletonTitleLine' />
+            <div className='skeletonTitleLine short' />
           </div>
         </div>
       </div>
@@ -27,64 +24,78 @@ const CardSkeleton = () => {
 export default CardSkeleton;
 
 const SkeletonContainer = styled.div`
+  cursor: default;
   width: 100%;
+  padding: 0 0.5%;
+  box-sizing: border-box;
+  font-size: 1rem;
 
   .cardContent {
-    max-width: 97%;
+    max-width: 100%;
     margin: 0 0 3% 0;
-    background: #ffffff !important;
-    box-shadow: 0px 0px 5px #969696;
+    background: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
     line-height: 1.4;
   }
 
   .imageWrapper {
+    position: relative;
     overflow: hidden;
+    aspect-ratio: 16 / 10;
+    background: #ebe7df;
+    border-radius: 14px 14px 0 0;
 
     .skeletonImage {
       width: 100%;
-      height: 200px;
-      background: #e8e4dc;
-    }
-  }
-
-  .cardTitle {
-    padding: 10px 1.5%;
-    height: 40px;
-    margin-top: -40px;
-    position: relative;
-    z-index: 3;
-    background: rgba(0, 0, 0, 0.45);
-
-    .skeletonSpan {
-      height: 16px;
-      width: 60%;
-      background: rgba(255, 255, 255, 0.35);
-      border-radius: 4px;
+      height: 100%;
+      background: linear-gradient(
+        90deg,
+        #ebe7df 0%,
+        #f5f2eb 50%,
+        #ebe7df 100%
+      );
+      background-size: 200% 100%;
+      animation: skeletonPulse 1.4s ease-in-out infinite;
     }
   }
 
   .titleContent {
+    padding: 4px 4px 8px;
+
     .title {
-      padding: 10px;
-      height: 60px;
+      padding: 10px 12px 12px;
+      min-height: 56px;
 
       .skeletonTitle,
       .skeletonTitleLine {
         height: 14px;
-        width: 90%;
+        width: 92%;
         background: #ebe7df;
         border-radius: 4px;
         margin-bottom: 8px;
       }
 
       .skeletonTitleLine.short {
-        width: 70%;
+        width: 68%;
+        margin-bottom: 0;
       }
     }
   }
 
+  @keyframes skeletonPulse {
+    0% {
+      background-position: 100% 0;
+    }
+    100% {
+      background-position: -100% 0;
+    }
+  }
+
   @media (min-width: 900px) {
-    width: 33.3%;
+    width: 33.333%;
     display: inline-grid;
   }
 
@@ -94,8 +105,17 @@ const SkeletonContainer = styled.div`
   }
 
   @media (max-width: 600px) {
+    width: 100%;
+    padding: 0;
+    display: block;
+
     .cardContent {
-      max-width: 100%;
+      margin-bottom: 14px;
+      border-radius: 12px;
+    }
+
+    .imageWrapper {
+      border-radius: 12px 12px 0 0;
     }
   }
 `;

@@ -19,49 +19,83 @@ const PostContext = createContext({
   deletePost: async (_id) => {},
 });
 
+function mapSeedPosts(raw) {
+  if (!Array.isArray(raw)) return [];
+  return raw.map((p) => ({
+    id: p.id,
+    title: p.title || "",
+    span: p.span || "",
+    description: p.description || "",
+    imageUrl: p.imageUrl || "",
+    imageAlt: p.imageAlt || "",
+  }));
+}
+
 export const PostProvider = ({ children }) => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const refresh = useCallback(async () => {
-    setLoading(true);
+  const refreshFromFirestore = useCallback(async (showLoading = false) => {
+    if (showLoading) setLoading(true);
     try {
       const { listPosts } = await import("../services/post.service");
       const data = await listPosts();
-      setPosts(data || []);
-    } catch (error) {
-      console.error("Error loading posts:", error);
-      setPosts([]);
+      if (data?.length) setPosts(data);
+    } catch {
+      /* keep seed / cached posts — avoid console noise in production */
     } finally {
-      setLoading(false);
+      if (showLoading) setLoading(false);
     }
   }, []);
 
   useEffect(() => {
     let cancelled = false;
-    const start = () => {
-      if (!cancelled) refresh();
-    };
-    // Defer Firestore further on mobile so FCP/LCP aren't blocked
-    const isMobile =
-      typeof window !== "undefined" && window.matchMedia("(max-width: 768px)").matches;
-    const delay = isMobile ? 2200 : 400;
 
-    if (typeof window !== "undefined" && "requestIdleCallback" in window) {
-      const id = window.requestIdleCallback(start, {
-        timeout: isMobile ? 3200 : 1800,
-      });
-      return () => {
-        cancelled = true;
-        window.cancelIdleCallback?.(id);
+    const loadSeed = async () => {
+      let seeded = false;
+      try {
+        const res = await fetch("/data/posts-seed.json", {
+          cache: "force-cache",
+        });
+        if (res.ok) {
+          const json = await res.json();
+          if (!cancelled && json?.length) {
+            setPosts(mapSeedPosts(json));
+            setLoading(false);
+            seeded = true;
+          }
+        }
+      } catch {
+        /* fall through */
+      }
+
+      if (cancelled) return;
+
+      if (!seeded) {
+        await refreshFromFirestore(true);
+        return;
+      }
+
+      const syncLater = () => {
+        if (!cancelled) refreshFromFirestore(false);
       };
-    }
-    const t = setTimeout(start, delay);
+
+      if ("requestIdleCallback" in window) {
+        window.requestIdleCallback(syncLater, { timeout: 15000 });
+      } else {
+        setTimeout(syncLater, 10000);
+      }
+    };
+
+    loadSeed();
     return () => {
       cancelled = true;
-      clearTimeout(t);
     };
-  }, [refresh]);
+  }, [refreshFromFirestore]);
+
+  const refresh = useCallback(async () => {
+    await refreshFromFirestore(true);
+  }, [refreshFromFirestore]);
 
   const createPost = async (post) => {
     const { createPost: createPostService } = await import(

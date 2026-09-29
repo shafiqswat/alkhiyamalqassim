@@ -2,15 +2,10 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import dynamic from "next/dynamic";
 import styled from "styled-components";
+import SliderInner from "./slider";
 
-const SliderInner = dynamic(() => import("./slider"), {
-  ssr: false,
-  loading: () => <Placeholder aria-hidden='true' />,
-});
-
-/** Defer gallery until near viewport — keeps mobile FCP/LCP on hero text */
+/** Defer gallery until near viewport — keeps mobile LCP on hero */
 export default function LazySlider() {
   const ref = useRef(null);
   const [show, setShow] = useState(false);
@@ -20,7 +15,7 @@ export default function LazySlider() {
     if (!el) return undefined;
 
     if (typeof IntersectionObserver === "undefined") {
-      const t = setTimeout(() => setShow(true), 2000);
+      const t = setTimeout(() => setShow(true), 3000);
       return () => clearTimeout(t);
     }
 
@@ -31,27 +26,42 @@ export default function LazySlider() {
           io.disconnect();
         }
       },
-      { rootMargin: "120px" }
+      { rootMargin: "80px" }
     );
     io.observe(el);
     return () => io.disconnect();
   }, []);
 
   return (
-    <div ref={ref}>
+    <Wrap ref={ref}>
       {show ? <SliderInner /> : <Placeholder aria-hidden='true' />}
-    </div>
+    </Wrap>
   );
 }
+
+const Wrap = styled.div`
+  width: 100%;
+  min-height: 200px;
+  margin: 0 0 1.5rem;
+
+  @media (min-width: 768px) {
+    min-height: 360px;
+  }
+
+  @media (max-width: 600px) {
+    margin-bottom: 1rem;
+    min-height: 200px;
+  }
+`;
 
 const Placeholder = styled.div`
   width: 100%;
   height: 200px;
-  margin: 0 0 1.5rem;
   border-radius: 12px;
   background: #0a2e24;
 
   @media (min-width: 768px) {
     height: 360px;
+    border-radius: 14px;
   }
 `;

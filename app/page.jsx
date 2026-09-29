@@ -3,31 +3,25 @@
 
 import React from "react";
 import styled from "styled-components";
-import dynamic from "next/dynamic";
+import LazySlider from "../src/Components/layout/LazySlider";
 import CardComponent from "../src/Components/layout/Card";
 import CardSkeleton from "../src/Components/layout/CardSkeleton";
 import { usePosts } from "../src/Context/postContext";
 import { siteConfig } from "../src/lib/siteConfig";
 import { optimizeImageUrl } from "../src/helpers/optimizeImage";
 
-const Slider = dynamic(() => import("../src/Components/layout/LazySlider"), {
-  ssr: false,
-  loading: () => <SliderPlaceholder aria-hidden='true' />,
-});
-
 const PAGE_SIZE = 6;
 
 export default function Page() {
   const { posts, loading } = usePosts();
-  const [mounted, setMounted] = React.useState(false);
   const [visible, setVisible] = React.useState(PAGE_SIZE);
 
   React.useEffect(() => {
-    setMounted(true);
     document.title = `${siteConfig.brandAr} | مظلات وسواتر وخيام ملكي في القصيم بريدة عنيزة`;
   }, []);
 
   const shown = posts.slice(0, visible);
+  const showGrid = posts.length > 0;
 
   return (
     <main role='main'>
@@ -55,26 +49,19 @@ export default function Page() {
           </HeroInner>
         </Hero>
 
-        <Slider />
+        <LazySlider />
 
-        <section aria-label='منتجاتنا'>
-          {!mounted || loading ? (
-            <>
-              {Array.from({ length: 4 }).map((_, index) => (
-                <CardSkeleton key={index} />
-              ))}
-            </>
-          ) : (
+        <ProductsSection aria-label='منتجاتنا' $ready={showGrid}>
+          {showGrid ? (
             <>
               {shown.map((item, index) => (
                 <CardComponent
                   key={item.id || index}
-                  priority={false}
                   item={{
                     id: item.id,
                     cardImage: optimizeImageUrl(item.imageUrl, {
-                      width: 400,
-                      height: 280,
+                      width: 360,
+                      height: 240,
                     }),
                     cardTitle: item.title,
                     cardSpan: item.span,
@@ -96,23 +83,22 @@ export default function Page() {
                 </LoadMoreWrap>
               ) : null}
             </>
-          )}
-        </section>
+          ) : loading ? (
+            <>
+              {Array.from({ length: PAGE_SIZE }).map((_, index) => (
+                <CardSkeleton key={index} />
+              ))}
+            </>
+          ) : null}
+        </ProductsSection>
       </article>
     </main>
   );
 }
 
-const SliderPlaceholder = styled.div`
+const ProductsSection = styled.section`
   width: 100%;
-  height: 200px;
-  margin: 0 0 1.5rem;
-  border-radius: 12px;
-  background: #0a2e24;
-
-  @media (min-width: 768px) {
-    height: 360px;
-  }
+  font-size: 0;
 `;
 
 const Hero = styled.header`
@@ -125,9 +111,11 @@ const Hero = styled.header`
     linear-gradient(145deg, #062820 0%, #0f4c3a 55%, #083328 100%);
   color: #fff;
   text-align: center;
+  min-height: 280px;
 
   @media (max-width: 640px) {
     margin: -12px -12px 1.25rem;
+    min-height: 320px;
   }
 `;
 
@@ -181,20 +169,23 @@ const WhatsappButton = styled.a`
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 46px;
-  padding: 0.7rem 1.35rem;
+  min-height: 48px;
+  min-width: 48px;
+  padding: 0.75rem 1.35rem;
   border-radius: 999px;
-  background: #25d366;
-  color: #fff !important;
+  background: #0a6b38;
+  color: #ffffff !important;
   font-weight: 800;
   text-decoration: none !important;
+  box-shadow: 0 2px 0 #064526;
 `;
 
 const CallButton = styled.a`
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 46px;
+  min-height: 48px;
+  min-width: 48px;
   padding: 0.7rem 1.2rem;
   border-radius: 999px;
   background: ${(p) => (p.$ghost ? "transparent" : "#d4a84b")};
@@ -217,6 +208,7 @@ const LoadMore = styled.button`
   background: #0f4c3a;
   color: #fff;
   font-weight: 800;
+  min-height: 48px;
   padding: 0.75rem 1.5rem;
   border-radius: 999px;
   cursor: pointer;

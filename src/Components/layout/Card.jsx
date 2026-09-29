@@ -63,24 +63,17 @@ function CardComponent({ item, hideImage = false, priority = false }) {
                 fetchPriority='low'
               />
               <div className='imageOverlay' />
-            </div>
-            {item.cardSpan ? (
-              <div className='cardTitle'>
-                <span>{item.cardSpan}</span>
-              </div>
-            ) : null}
-          </>
-        ) : null}
-        <div className='titleContent'>
-          <div className='titleIcon'>
-            <div
-              className='titleShare typcn typcn-export-outline'
-              aria-label='share'
-              role='button'
-              tabIndex={0}
-              onClick={(e) => e.stopPropagation()}
-            />
-            <div className='dropDownContent'>
+              <ShareWrap
+                className='titleIcon'
+                onClick={(e) => e.stopPropagation()}>
+                <button
+                  type='button'
+                  className='titleShare'
+                  aria-label='مشاركة'
+                  tabIndex={0}>
+                  <ShareIcon />
+                </button>
+                <div className='dropDownContent'>
               <button
                 type='button'
                 onClick={(e) => {
@@ -149,8 +142,17 @@ function CardComponent({ item, hideImage = false, priority = false }) {
                   />
                 </svg>
               </button>
+                </div>
+              </ShareWrap>
+              {item.cardSpan ? (
+                <div className='cardTitle'>
+                  <span>{item.cardSpan}</span>
+                </div>
+              ) : null}
             </div>
-          </div>
+          </>
+        ) : null}
+        <div className='titleContent'>
           <div className='title'>
             <h2>
               <strong>{item.cardTitle}</strong>
@@ -164,6 +166,26 @@ function CardComponent({ item, hideImage = false, priority = false }) {
 
 export default CardComponent;
 
+const ShareIcon = () => (
+  <svg
+    viewBox='0 0 24 24'
+    width='18'
+    height='18'
+    aria-hidden='true'>
+    <path
+      fill='currentColor'
+      d='M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7a3.27 3.27 0 0 0 0-1.39l7.05-4.11A2.99 2.99 0 1 0 14 5a2.99 2.99 0 0 0 .04.49L7 9.6a3 3 0 1 0 0 4.8l7.05 4.11c.14.88.88 1.49 1.95 1.49a2 2 0 1 0-.02-4Z'
+    />
+  </svg>
+);
+
+const ShareWrap = styled.div`
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 4;
+`;
+
 const CardContainer = styled.div`
   cursor: pointer;
   width: 100%;
@@ -172,10 +194,15 @@ const CardContainer = styled.div`
   position: relative;
   z-index: 1;
   overflow: visible;
+  font-size: 1rem;
 
   &:hover,
   &:focus-within {
     z-index: 50;
+
+    .cardContent {
+      overflow: visible;
+    }
   }
 
   .cardContent {
@@ -185,7 +212,7 @@ const CardContainer = styled.div`
     background: #fff;
     border: 1px solid rgba(0, 0, 0, 0.06);
     border-radius: 14px;
-    overflow: visible;
+    overflow: hidden;
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
     line-height: 1.4;
     transition: transform 0.25s ease, box-shadow 0.25s ease;
@@ -229,11 +256,14 @@ const CardContainer = styled.div`
     padding: 8px 12px;
     min-height: 36px;
     z-index: 3;
-    position: relative;
+    position: absolute;
+    right: 0;
+    left: 0;
+    bottom: 0;
     color: #fff;
-    margin-top: -40px;
     display: flex;
     align-items: center;
+    pointer-events: none;
 
     span {
       display: inline-block;
@@ -247,94 +277,79 @@ const CardContainer = styled.div`
     }
   }
 
-  .titleContent {
-    display: flex;
-    flex-direction: row-reverse;
-    flex-wrap: wrap;
-    align-items: flex-start;
-    padding: 4px 4px 8px;
+  .imageWrapper .titleIcon {
+    .titleShare {
+      cursor: pointer;
+      margin: 0;
+      padding: 0;
+      border: none;
+      color: #fff;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: rgba(15, 76, 58, 0.92);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    }
 
-    .titleIcon {
-      font-size: 1.5em;
-      position: relative;
-      padding: 0 8px;
-      opacity: 0.95;
-      z-index: 20;
-      text-align: center;
-      height: auto;
-      margin-top: -52px;
-      overflow: visible;
+    &:hover .dropDownContent,
+    .dropDownContent:hover,
+    &:focus-within .dropDownContent {
+      visibility: visible;
+      opacity: 1;
+      pointer-events: auto;
+    }
 
-      .titleShare {
+    .dropDownContent {
+      width: 44px;
+      visibility: hidden;
+      opacity: 0;
+      pointer-events: none;
+      position: absolute;
+      bottom: calc(100% + 8px);
+      left: 0;
+      background-color: #fff;
+      border: 1px solid #e8e8e8;
+      border-radius: 10px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.16);
+      transition: opacity 0.2s ease, visibility 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 6px 0;
+      z-index: 100;
+
+      button {
+        all: unset;
         cursor: pointer;
-        margin: 0;
-        color: #fff;
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        background: rgba(142, 0, 59, 0.92);
-        display: inline-flex;
+        padding: 6px;
+        display: flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        box-sizing: border-box;
       }
 
-      &:hover .dropDownContent,
-      .dropDownContent:hover,
-      &:focus-within .dropDownContent {
-        visibility: visible;
-        opacity: 1;
-        pointer-events: auto;
+      .socialicon {
+        height: 22px;
+        width: 22px;
+        margin: 0;
+        transition: transform 0.25s ease, color 0.2s ease;
+        display: block;
+        color: #444;
       }
 
-      .dropDownContent {
-        width: 44px;
-        visibility: hidden;
-        opacity: 0;
-        pointer-events: none;
-        position: absolute;
-        bottom: calc(100% + 8px);
-        top: auto;
-        left: 50%;
-        right: auto;
-        transform: translateX(-50%);
-        background-color: #fff;
-        border: 1px solid #e8e8e8;
-        border-radius: 10px;
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.16);
-        transition: opacity 0.2s ease, visibility 0.2s ease;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding: 6px 0;
-        z-index: 100;
-        overflow: visible;
-
-        button {
-          all: unset;
-          cursor: pointer;
-          padding: 6px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          box-sizing: border-box;
-        }
-
-        .socialicon {
-          height: 22px;
-          width: 22px;
-          margin: 0;
-          transition: transform 0.25s ease, color 0.2s ease;
-          display: block;
-          color: #444;
-        }
-
-        .socialicon:hover {
-          transform: scale(1.12);
-          color: #0f4c3a;
-        }
+      .socialicon:hover {
+        transform: scale(1.12);
+        color: #0f4c3a;
       }
     }
+  }
+
+  .titleContent {
+    display: block;
+    padding: 4px 4px 8px;
 
     .title {
       color: #1a1a1a;

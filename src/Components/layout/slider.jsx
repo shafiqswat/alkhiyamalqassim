@@ -68,10 +68,10 @@ export default function Slider() {
                 />
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={slide.fallback}
+                  src={slide.src}
                   alt={slide.alt}
-                  width={900}
-                  height={360}
+                  width={720}
+                  height={288}
                   loading={i === 0 ? "eager" : "lazy"}
                   decoding='async'
                   fetchPriority={i === 0 ? "high" : "low"}
@@ -126,20 +126,15 @@ const Shell = styled.section`
   overflow: hidden;
   background: #0a2e24;
   box-shadow: 0 8px 24px rgba(6, 40, 32, 0.14);
-  contain: strict;
-  content-visibility: auto;
-  contain-intrinsic-size: 280px;
 
   @media (min-width: 768px) {
     height: 360px;
-    contain-intrinsic-size: 360px;
   }
 
   @media (max-width: 600px) {
     height: 200px;
     margin-bottom: 1rem;
     border-radius: 12px;
-    contain-intrinsic-size: 200px;
   }
 `;
 
@@ -178,8 +173,8 @@ const Nav = styled.button`
   ${(p) => (p.$side === "prev" ? "left: 10px;" : "right: 10px;")}
   transform: translateY(-50%);
   z-index: 2;
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   border: none;
   border-radius: 50%;
   background: rgba(6, 40, 32, 0.65);
@@ -193,20 +188,35 @@ const Nav = styled.button`
 
 const Dots = styled.div`
   position: absolute;
-  bottom: 12px;
+  bottom: 8px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 2;
   display: flex;
-  gap: 6px;
+  gap: 4px;
+  align-items: center;
 `;
 
 const Dot = styled.button`
-  width: ${(p) => (p.$active ? "18px" : "8px")};
-  height: 8px;
+  width: 44px;
+  height: 44px;
   border: none;
   border-radius: 999px;
   padding: 0;
   cursor: pointer;
-  background: ${(p) => (p.$active ? "#d4a84b" : "rgba(255, 248, 231, 0.55)")};
+  display: grid;
+  place-items: center;
+  background: transparent;
+
+  &::after {
+    content: "";
+    display: block;
+    width: 22px;
+    height: 10px;
+    border-radius: 999px;
+    background: ${(p) =>
+      p.$active ? "#d4a84b" : "rgba(255, 248, 231, 0.45)"};
+    opacity: ${(p) => (p.$active ? 1 : 0.75)};
+    transform: scale(${(p) => (p.$active ? 1 : 0.45)});
+  }
 `;
