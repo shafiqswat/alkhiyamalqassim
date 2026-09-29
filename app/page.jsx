@@ -2,36 +2,37 @@
 "use client";
 
 import React from "react";
-import styled, { keyframes } from "styled-components";
-import Slider from "../src/Components/layout/slider";
+import styled from "styled-components";
+import dynamic from "next/dynamic";
 import CardComponent from "../src/Components/layout/Card";
 import CardSkeleton from "../src/Components/layout/CardSkeleton";
 import { usePosts } from "../src/Context/postContext";
 import { siteConfig } from "../src/lib/siteConfig";
+import { optimizeImageUrl } from "../src/helpers/optimizeImage";
+
+const Slider = dynamic(() => import("../src/Components/layout/slider"), {
+  ssr: false,
+  loading: () => <SliderPlaceholder aria-hidden='true' />,
+});
+
+const PAGE_SIZE = 12;
 
 export default function Page() {
   const { posts, loading } = usePosts();
   const [mounted, setMounted] = React.useState(false);
+  const [visible, setVisible] = React.useState(PAGE_SIZE);
 
   React.useEffect(() => {
     setMounted(true);
-    if (typeof window !== "undefined") {
-      document.title = `${siteConfig.brandAr} | مظلات وسواتر وخيام ملكي في القصيم بريدة عنيزة`;
-      let metaDescription = document.querySelector('meta[name="description"]');
-      if (!metaDescription) {
-        metaDescription = document.createElement("meta");
-        metaDescription.name = "description";
-        document.head.appendChild(metaDescription);
-      }
-      metaDescription.content = siteConfig.description;
-    }
+    document.title = `${siteConfig.brandAr} | مظلات وسواتر وخيام ملكي في القصيم بريدة عنيزة`;
   }, []);
+
+  const shown = posts.slice(0, visible);
 
   return (
     <main role='main'>
       <article>
         <Hero>
-          <HeroGlow aria-hidden='true' />
           <HeroInner>
             <BrandMark>{siteConfig.brandAr}</BrandMark>
             <h1>مظلات وسواتر وخيام ملكي في القصيم</h1>
@@ -64,22 +65,37 @@ export default function Page() {
               ))}
             </>
           ) : (
-            posts.map((item, index) => (
-              <CardComponent
-                key={item.id || index}
-                item={{
-                  id: item.id,
-                  cardImage: item.imageUrl,
-                  cardTitle: item.title,
-                  cardSpan: item.span,
-                  cardAlt:
-                    item.imageAlt ||
-                    item.span ||
-                    item.title ||
-                    `${siteConfig.brandAr} - مظلات وسواتر`,
-                }}
-              />
-            ))
+            <>
+              {shown.map((item, index) => (
+                <CardComponent
+                  key={item.id || index}
+                  priority={index < 3}
+                  item={{
+                    id: item.id,
+                    cardImage: optimizeImageUrl(item.imageUrl, {
+                      width: 480,
+                      height: 320,
+                    }),
+                    cardTitle: item.title,
+                    cardSpan: item.span,
+                    cardAlt:
+                      item.imageAlt ||
+                      item.span ||
+                      item.title ||
+                      `${siteConfig.brandAr} - مظلات وسواتر`,
+                  }}
+                />
+              ))}
+              {visible < posts.length ? (
+                <LoadMoreWrap>
+                  <LoadMore
+                    type='button'
+                    onClick={() => setVisible((v) => v + PAGE_SIZE)}>
+                    عرض المزيد ({posts.length - visible})
+                  </LoadMore>
+                </LoadMoreWrap>
+              ) : null}
+            </>
           )}
         </section>
       </article>
@@ -87,41 +103,32 @@ export default function Page() {
   );
 }
 
-const rise = keyframes`
-  from { opacity: 0; transform: translateY(18px); }
-  to { opacity: 1; transform: translateY(0); }
-`;
+const SliderPlaceholder = styled.div`
+  width: 100%;
+  height: 200px;
+  margin: 0 0 1.5rem;
+  border-radius: 12px;
+  background: #0a2e24;
 
-const shimmer = keyframes`
-  0% { background-position: 0% 50%; }
-  100% { background-position: 100% 50%; }
+  @media (min-width: 768px) {
+    height: 360px;
+  }
 `;
 
 const Hero = styled.header`
   position: relative;
   overflow: hidden;
   margin: -20px -20px 1.5rem;
-  padding: clamp(2.4rem, 6vw, 4.2rem) 1.25rem clamp(2rem, 5vw, 3.2rem);
+  padding: clamp(2rem, 5vw, 3.4rem) 1.25rem;
   background:
-    linear-gradient(145deg, rgba(6, 40, 32, 0.92) 0%, rgba(15, 76, 58, 0.88) 48%, rgba(8, 51, 40, 0.94) 100%),
-    radial-gradient(ellipse at 20% 20%, rgba(212, 168, 75, 0.28), transparent 45%),
-    url("/images/slider3.jpg") center / cover no-repeat;
+    radial-gradient(ellipse at 20% 10%, rgba(212, 168, 75, 0.22), transparent 50%),
+    linear-gradient(145deg, #062820 0%, #0f4c3a 55%, #083328 100%);
   color: #fff;
   text-align: center;
-  animation: ${rise} 0.7s ease both;
 
   @media (max-width: 640px) {
     margin: -12px -12px 1.25rem;
   }
-`;
-
-const HeroGlow = styled.div`
-  position: absolute;
-  inset: auto -10% -40% auto;
-  width: 55%;
-  height: 70%;
-  background: radial-gradient(circle, rgba(232, 213, 163, 0.22), transparent 70%);
-  pointer-events: none;
 `;
 
 const HeroInner = styled.div`
@@ -136,7 +143,6 @@ const HeroInner = styled.div`
     font-weight: 800;
     line-height: 1.25;
     color: #fff8e7;
-    text-shadow: 0 2px 18px rgba(0, 0, 0, 0.35);
   }
 
   p {
@@ -153,13 +159,7 @@ const BrandMark = styled.span`
   font-size: clamp(1.85rem, 5vw, 3rem);
   font-weight: 900;
   letter-spacing: 0.02em;
-  background: linear-gradient(90deg, #fff1b0, #f5c542, #d4a84b, #fff1b0);
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: ${shimmer} 4s linear infinite;
-  filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.35));
+  color: #f5c542;
 `;
 
 const Cities = styled.p`
@@ -188,14 +188,6 @@ const WhatsappButton = styled.a`
   color: #fff !important;
   font-weight: 800;
   text-decoration: none !important;
-  box-shadow: 0 10px 24px rgba(37, 211, 102, 0.28);
-  transition: transform 0.18s ease, box-shadow 0.18s ease;
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 14px 28px rgba(37, 211, 102, 0.35);
-    color: #fff !important;
-  }
 `;
 
 const CallButton = styled.a`
@@ -207,14 +199,25 @@ const CallButton = styled.a`
   border-radius: 999px;
   background: ${(p) => (p.$ghost ? "transparent" : "#d4a84b")};
   color: ${(p) => (p.$ghost ? "#fff8e7" : "#062820")} !important;
-  border: 1.5px solid ${(p) => (p.$ghost ? "rgba(232, 213, 163, 0.55)" : "#d4a84b")};
+  border: 1.5px solid
+    ${(p) => (p.$ghost ? "rgba(232, 213, 163, 0.55)" : "#d4a84b")};
   font-weight: 800;
   text-decoration: none !important;
-  transition: transform 0.18s ease, background 0.18s ease;
+`;
 
-  &:hover {
-    transform: translateY(-2px);
-    background: ${(p) => (p.$ghost ? "rgba(255, 255, 255, 0.08)" : "#e8d5a3")};
-    color: ${(p) => (p.$ghost ? "#fff8e7" : "#062820")} !important;
-  }
+const LoadMoreWrap = styled.div`
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 1rem 0 0.5rem;
+`;
+
+const LoadMore = styled.button`
+  border: none;
+  background: #0f4c3a;
+  color: #fff;
+  font-weight: 800;
+  padding: 0.75rem 1.5rem;
+  border-radius: 999px;
+  cursor: pointer;
 `;

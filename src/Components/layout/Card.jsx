@@ -4,12 +4,14 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import styled from "styled-components";
+import { optimizeImageUrl } from "../../helpers/optimizeImage";
 
-function CardComponent({ item, hideImage = false }) {
+function CardComponent({ item, hideImage = false, priority = false }) {
   const currentUrl = typeof window !== "undefined" ? window.location.href : "";
   const textToShare = encodeURIComponent(item.cardTitle || "");
   const urlToShare = encodeURIComponent(currentUrl);
   const router = useRouter();
+  const imageSrc = optimizeImageUrl(item.cardImage, { width: 480, height: 320 });
 
   const handleClick = () => {
     router.push(`/product/${item.id}`);
@@ -47,14 +49,18 @@ function CardComponent({ item, hideImage = false }) {
           <>
             <div className='imageWrapper'>
               <img
-                src={item.cardImage}
+                src={imageSrc}
                 alt={
                   item.cardAlt ||
                   item.cardSpan ||
                   item.cardTitle ||
                   "الخيام القصيم - مظلات وسواتر"
                 }
-                loading='lazy'
+                width={480}
+                height={320}
+                loading={priority ? "eager" : "lazy"}
+                decoding='async'
+                fetchPriority={priority ? "high" : "low"}
               />
               <div className='imageOverlay' />
             </div>

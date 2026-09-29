@@ -6,23 +6,28 @@ import styled from "styled-components";
 
 const slides = [
   {
-    src: "/images/slider3.jpg",
+    src: "/images/slider3.webp",
+    fallback: "/images/slider3.jpg",
     alt: "مظلات سيارات عالية الجودة في القصيم بريدة عنيزة - الخيام القصيم",
   },
   {
-    src: "/images/slider4.jpg",
+    src: "/images/slider4.webp",
+    fallback: "/images/slider4.jpg",
     alt: "سواتر حديد وقماش وبلاستيك للمدارس والمساجد في القصيم",
   },
   {
-    src: "/images/slider5.jpg",
+    src: "/images/slider5.webp",
+    fallback: "/images/slider5.jpg",
     alt: "جلسات وبرجولات بخامات فاخرة - الخيام القصيم بريدة",
   },
   {
-    src: "/images/slider6.jpg",
+    src: "/images/slider6.webp",
+    fallback: "/images/slider6.jpg",
     alt: "خيام ملكي تفصيل وتركيب في عنيزة والرس والبكيرية",
   },
   {
-    src: "/images/slider7.jpg",
+    src: "/images/slider7.webp",
+    fallback: "/images/slider7.jpg",
     alt: "مظلات حدائق ومداخل ومدارس وأسواق - الخيام القصيم",
   },
 ];
@@ -37,7 +42,7 @@ export default function Slider() {
 
   useEffect(() => {
     if (paused) return undefined;
-    const id = setInterval(() => go(1), 5000);
+    const id = setInterval(() => go(1), 5500);
     return () => clearInterval(id);
   }, [paused, go]);
 
@@ -48,20 +53,33 @@ export default function Slider() {
       aria-roledescription='carousel'
       aria-label='معرض أعمال الخيام القصيم'>
       <Frame>
-        {slides.map((slide, i) => (
-          <Slide
-            key={slide.src}
-            $active={i === index}
-            aria-hidden={i !== index}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={slide.src}
-              alt={slide.alt}
-              loading={i === 0 ? "eager" : "lazy"}
-              decoding='async'
-            />
-          </Slide>
-        ))}
+        {slides.map((slide, i) => {
+          const near = Math.abs(i - index) <= 1 || (index === 0 && i === slides.length - 1);
+          if (!near && i !== index) return null;
+          return (
+            <Slide
+              key={slide.src}
+              $active={i === index}
+              aria-hidden={i !== index}>
+              <picture>
+                <source
+                  srcSet={slide.src}
+                  type='image/webp'
+                />
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={slide.fallback}
+                  alt={slide.alt}
+                  width={900}
+                  height={360}
+                  loading={i === 0 ? "eager" : "lazy"}
+                  decoding='async'
+                  fetchPriority={i === 0 ? "high" : "low"}
+                />
+              </picture>
+            </Slide>
+          );
+        })}
         <Scrim aria-hidden='true' />
       </Frame>
 
@@ -80,7 +98,9 @@ export default function Slider() {
         ›
       </Nav>
 
-      <Dots role='tablist' aria-label='شرائح المعرض'>
+      <Dots
+        role='tablist'
+        aria-label='شرائح المعرض'>
         {slides.map((slide, i) => (
           <Dot
             key={slide.src}
@@ -106,35 +126,36 @@ const Shell = styled.section`
   overflow: hidden;
   background: #0a2e24;
   box-shadow: 0 8px 24px rgba(6, 40, 32, 0.14);
-  contain: layout size style;
+  contain: strict;
+  content-visibility: auto;
+  contain-intrinsic-size: 280px;
 
   @media (min-width: 768px) {
     height: 360px;
+    contain-intrinsic-size: 360px;
   }
 
   @media (max-width: 600px) {
     height: 200px;
     margin-bottom: 1rem;
     border-radius: 12px;
+    contain-intrinsic-size: 200px;
   }
 `;
 
 const Frame = styled.div`
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
 `;
 
 const Slide = styled.div`
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
   opacity: ${(p) => (p.$active ? 1 : 0)};
-  transition: opacity 0.7s ease;
-  pointer-events: ${(p) => (p.$active ? "auto" : "none")};
+  transition: opacity 0.55s ease;
+  pointer-events: none;
 
+  picture,
   img {
     display: block;
     width: 100%;
@@ -148,11 +169,7 @@ const Scrim = styled.div`
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: linear-gradient(
-    to top,
-    rgba(6, 40, 32, 0.45) 0%,
-    transparent 45%
-  );
+  background: linear-gradient(to top, rgba(6, 40, 32, 0.4), transparent 45%);
 `;
 
 const Nav = styled.button`
@@ -172,17 +189,6 @@ const Nav = styled.button`
   cursor: pointer;
   display: grid;
   place-items: center;
-  transition: background 0.15s ease;
-
-  &:hover {
-    background: #0f4c3a;
-  }
-
-  @media (max-width: 600px) {
-    width: 30px;
-    height: 30px;
-    font-size: 1.15rem;
-  }
 `;
 
 const Dots = styled.div`
@@ -203,5 +209,4 @@ const Dot = styled.button`
   padding: 0;
   cursor: pointer;
   background: ${(p) => (p.$active ? "#d4a84b" : "rgba(255, 248, 231, 0.55)")};
-  transition: width 0.2s ease, background 0.2s ease;
 `;

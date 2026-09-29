@@ -87,16 +87,11 @@ const TickerContainer = styled.div`
       flex-shrink: 0;
 
       span {
-        transition: transform 0.6s ease-in-out;
         display: inline-block;
       }
 
       .typcn-large {
         font-size: 24px !important;
-      }
-
-      &:hover span {
-        transform: rotate(360deg);
       }
     }
 

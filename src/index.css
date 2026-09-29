@@ -1,7 +1,7 @@
 /** @format */
 
 * {
-  font-family: "Tajawal", "Segoe UI", Tahoma, sans-serif !important;
+  font-family: "Tajawal", "Segoe UI", Tahoma, sans-serif;
 }
 
 html {
@@ -20,4 +20,14 @@ a {
 
 img {
   max-width: 100%;
+  height: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
 }

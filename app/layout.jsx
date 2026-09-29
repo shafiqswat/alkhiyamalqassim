@@ -1,14 +1,12 @@
 /** @format */
 "use client";
-import React from "react";
-import "typicons.font";
+import React, { useEffect } from "react";
 import "../src/index.css";
 import "../src/App.css";
 import "../src/styles/sr-only.css";
 import Header from "../src/Components/Header";
 import Footer from "../src/Components/Footer";
 import BreadCrumb from "../src/Components/BreadCrumb";
-import Ticker from "../src/Components/Ticker";
 import { SearchProvider } from "../src/Components/context/SearchContext";
 import styled from "styled-components";
 import StyledComponentsRegistry from "./StyledComponentsRegistry";
@@ -16,14 +14,24 @@ import dynamic from "next/dynamic";
 import { UserProvider } from "../src/Context/userContext";
 import { PostProvider } from "../src/Context/postContext";
 import { siteConfig } from "../src/lib/siteConfig";
+import { initAnalyticsDeferred } from "../src/lib/firebaseConfig";
 
-const MapLeaflet = dynamic(() => import("../src/Components/MapLeaflet"), {
+const LazyMap = dynamic(() => import("../src/Components/LazyMap"), {
+  ssr: false,
+  loading: () => <div style={{ minHeight: 280 }} aria-hidden='true' />,
+});
+
+const Ticker = dynamic(() => import("../src/Components/Ticker"), {
   ssr: false,
 });
 
 export default function RootLayout({ children }) {
   const domain = siteConfig.domain;
   const phoneE164 = `+${siteConfig.whatsapp}`;
+
+  useEffect(() => {
+    initAnalyticsDeferred();
+  }, []);
 
   return (
     <html
@@ -113,8 +121,23 @@ export default function RootLayout({ children }) {
           crossOrigin='anonymous'
         />
         <link
-          href='https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap'
+          rel='preconnect'
+          href='https://res.cloudinary.com'
+          crossOrigin='anonymous'
+        />
+        <link
+          rel='dns-prefetch'
+          href='https://firestore.googleapis.com'
+        />
+        <link
+          href='https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=swap'
           rel='stylesheet'
+        />
+        <link
+          rel='preload'
+          as='image'
+          href='/images/slider3.webp'
+          type='image/webp'
         />
         <meta
           property='og:locale'
@@ -139,18 +162,6 @@ export default function RootLayout({ children }) {
         <meta
           property='og:image'
           content={`${domain}/images/slider3.jpg`}
-        />
-        <meta
-          property='og:image:width'
-          content='1200'
-        />
-        <meta
-          property='og:image:height'
-          content='630'
-        />
-        <meta
-          property='og:image:alt'
-          content={`${siteConfig.brandAr} - مظلات وسواتر وخيام ملكي القصيم`}
         />
         <meta
           property='og:url'
@@ -187,17 +198,15 @@ export default function RootLayout({ children }) {
               alternateName: [
                 siteConfig.brandEn,
                 "Al Khiyam Al Qassim",
-                "خيام القصيم",
                 "مظلات القصيم",
-                "سواتر بريدة",
               ],
               description: siteConfig.description,
-              image: [
-                `${domain}/images/slider3.jpg`,
-                `${domain}/images/logo.jpg`,
-              ],
+              image: `${domain}/images/logo.jpg`,
               url: `${domain}/`,
-              telephone: [phoneE164, `+966${siteConfig.phoneSecondary.replace(/\s/g, "").replace(/^0/, "")}`],
+              telephone: [
+                phoneE164,
+                `+966${siteConfig.phoneSecondary.replace(/^0/, "")}`,
+              ],
               email: [siteConfig.emailPrimary, siteConfig.emailSecondary],
               priceRange: "$$",
               address: {
@@ -218,41 +227,7 @@ export default function RootLayout({ children }) {
                 longitude: siteConfig.geo.lng,
               },
               openingHours: ["Mo-Su 08:00-22:00"],
-              sameAs: [
-                domain,
-                siteConfig.instagram,
-                siteConfig.snapchat,
-              ],
-              hasOfferCatalog: {
-                "@type": "OfferCatalog",
-                name: "مظلات وسواتر وخيام",
-                itemListElement: [
-                  {
-                    "@type": "Offer",
-                    itemOffered: { "@type": "Service", name: "مظلات سيارات" },
-                  },
-                  {
-                    "@type": "Offer",
-                    itemOffered: { "@type": "Service", name: "مظلات حدائق" },
-                  },
-                  {
-                    "@type": "Offer",
-                    itemOffered: { "@type": "Service", name: "مظلات مسابح" },
-                  },
-                  {
-                    "@type": "Offer",
-                    itemOffered: { "@type": "Service", name: "سواتر حديد" },
-                  },
-                  {
-                    "@type": "Offer",
-                    itemOffered: { "@type": "Service", name: "خيام ملكي" },
-                  },
-                  {
-                    "@type": "Offer",
-                    itemOffered: { "@type": "Service", name: "جلسات وبرجولات" },
-                  },
-                ],
-              },
+              sameAs: [domain, siteConfig.instagram, siteConfig.snapchat],
             }),
           }}
         />
@@ -264,7 +239,6 @@ export default function RootLayout({ children }) {
               "@type": "WebSite",
               "@id": `${domain}/#website`,
               name: siteConfig.brandAr,
-              alternateName: [siteConfig.brandEn, "Al Khiyam Al Qassim"],
               url: `${domain}/`,
               inLanguage: "ar-SA",
               potentialAction: {
@@ -275,37 +249,6 @@ export default function RootLayout({ children }) {
                 },
                 "query-input": "required name=search_term_string",
               },
-            }),
-          }}
-        />
-        <script
-          type='application/ld+json'
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "Organization",
-              "@id": `${domain}/#organization`,
-              name: siteConfig.brandAr,
-              url: `${domain}/`,
-              logo: `${domain}/images/logo.jpg`,
-              email: siteConfig.emailPrimary,
-              contactPoint: [
-                {
-                  "@type": "ContactPoint",
-                  telephone: phoneE164,
-                  contactType: "customer service",
-                  areaServed: "SA",
-                  availableLanguage: ["Arabic", "ar"],
-                },
-                {
-                  "@type": "ContactPoint",
-                  telephone: `+966${siteConfig.phoneSecondary.replace(/^0/, "")}`,
-                  contactType: "customer service",
-                  areaServed: "SA",
-                  availableLanguage: ["Arabic", "ar"],
-                },
-              ],
-              sameAs: [siteConfig.instagram, siteConfig.snapchat],
             }),
           }}
         />
@@ -326,35 +269,6 @@ export default function RootLayout({ children }) {
             }),
           }}
         />
-        <script
-          type='application/ld+json'
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "BreadcrumbList",
-              itemListElement: [
-                {
-                  "@type": "ListItem",
-                  position: 1,
-                  name: "الرئيسية",
-                  item: `${domain}/`,
-                },
-                {
-                  "@type": "ListItem",
-                  position: 2,
-                  name: "مظلات القصيم",
-                  item: `${domain}/alqasim`,
-                },
-                {
-                  "@type": "ListItem",
-                  position: 3,
-                  name: "سواتر القصيم",
-                  item: `${domain}/sawatiralqasim`,
-                },
-              ],
-            }),
-          }}
-        />
       </head>
       <body>
         <SearchProvider>
@@ -367,7 +281,7 @@ export default function RootLayout({ children }) {
                     <BreadCrumb />
                     {children}
                     <FullWidthMap>
-                      <MapLeaflet />
+                      <LazyMap />
                     </FullWidthMap>
                   </ContentArea>
                   <Ticker />
@@ -385,9 +299,7 @@ export default function RootLayout({ children }) {
 const DashboardContainer = styled.div`
   overflow: visible;
   min-height: 100vh;
-  background:
-    radial-gradient(ellipse at top, rgba(15, 76, 58, 0.08), transparent 42%),
-    linear-gradient(180deg, #f4efe4 0%, #ebe4d6 100%);
+  background: linear-gradient(180deg, #f4efe4 0%, #ebe4d6 100%);
 `;
 
 const ContentArea = styled.main`
@@ -413,4 +325,6 @@ const FullWidthMap = styled.div`
   margin-top: 24px;
   border-radius: 14px;
   overflow: hidden;
+  content-visibility: auto;
+  contain-intrinsic-size: 280px;
 `;

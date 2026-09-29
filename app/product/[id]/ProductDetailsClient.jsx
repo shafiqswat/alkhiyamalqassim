@@ -5,6 +5,7 @@ import React, { useEffect, useMemo } from "react";
 import Link from "next/link";
 import styled from "styled-components";
 import { usePosts } from "../../../src/Context/postContext";
+import { optimizeImageUrl } from "../../../src/helpers/optimizeImage";
 
 const WHATSAPP = "966500886893";
 
@@ -49,13 +50,17 @@ export default function ProductDetailsClient({ productId }) {
       <Media>
         {product.imageUrl ? (
           <img
-            src={product.imageUrl}
+            src={optimizeImageUrl(product.imageUrl, { width: 900 })}
             alt={
               product.imageAlt ||
               product.span ||
               product.title ||
               "الخيام القصيم - مظلات وسواتر"
             }
+            width={900}
+            height={600}
+            loading='eager'
+            decoding='async'
           />
         ) : (
           <div className='placeholder'>لا توجد صورة</div>

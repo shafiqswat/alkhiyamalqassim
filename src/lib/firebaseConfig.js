@@ -1,10 +1,8 @@
 /** @format */
 
-// lib/firebaseConfig.js
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
-import { getAnalytics, isSupported } from "firebase/analytics";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -23,12 +21,23 @@ export const auth = typeof window !== "undefined" ? getAuth(app) : null;
 export const firestore =
   typeof window !== "undefined" ? getFirestore(app) : null;
 
-if (typeof window !== "undefined") {
-  isSupported()
-    .then((ok) => {
-      if (ok) getAnalytics(app);
-    })
-    .catch(() => {});
+/** Analytics only after idle — never on critical path */
+export function initAnalyticsDeferred() {
+  if (typeof window === "undefined") return;
+  const run = () => {
+    import("firebase/analytics")
+      .then(({ getAnalytics, isSupported }) =>
+        isSupported().then((ok) => {
+          if (ok) getAnalytics(app);
+        })
+      )
+      .catch(() => {});
+  };
+  if ("requestIdleCallback" in window) {
+    window.requestIdleCallback(run, { timeout: 5000 });
+  } else {
+    setTimeout(run, 4000);
+  }
 }
 
 export default app;
