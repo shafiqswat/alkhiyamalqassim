@@ -2,8 +2,8 @@
 "use client";
 import React, { useEffect } from "react";
 import "../src/index.css";
+import "../src/App.css";
 import "../src/styles/sr-only.css";
-import DeferredAppStyles from "../src/Components/DeferredAppStyles";
 import Header from "../src/Components/Header";
 import Footer from "../src/Components/Footer";
 import BreadCrumb from "../src/Components/BreadCrumb";
@@ -15,7 +15,6 @@ import { UserProvider } from "../src/Context/userContext";
 import { PostProvider } from "../src/Context/postContext";
 import { siteConfig } from "../src/lib/siteConfig";
 import { initAnalyticsDeferred } from "../src/lib/firebaseConfig";
-import DeferredStyles from "../src/Components/DeferredStyles";
 import Ticker from "../src/Components/Ticker";
 
 const LazyMap = dynamic(() => import("../src/Components/LazyMap"), {
@@ -174,6 +173,10 @@ export default function RootLayout({ children }) {
           name='twitter:image'
           content={`${domain}/images/slider3.webp`}
         />
+        <link
+          rel='stylesheet'
+          href='/font%20icons/typicons.min.css'
+        />
         <script
           type='application/ld+json'
           dangerouslySetInnerHTML={{
@@ -258,8 +261,6 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body>
-        <DeferredAppStyles />
-        <DeferredStyles />
         <SearchProvider>
           <UserProvider>
             <PostProvider>

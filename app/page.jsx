@@ -5,7 +5,6 @@ import React from "react";
 import styled from "styled-components";
 import LazySlider from "../src/Components/layout/LazySlider";
 import CardComponent from "../src/Components/layout/Card";
-import CardSkeleton from "../src/Components/layout/CardSkeleton";
 import { usePosts } from "../src/Context/postContext";
 import { siteConfig } from "../src/lib/siteConfig";
 import { optimizeImageUrl } from "../src/helpers/optimizeImage";
@@ -84,11 +83,7 @@ export default function Page() {
               ) : null}
             </>
           ) : loading ? (
-            <>
-              {Array.from({ length: PAGE_SIZE }).map((_, index) => (
-                <CardSkeleton key={index} />
-              ))}
-            </>
+            <ProductsPlaceholder aria-hidden='true' />
           ) : null}
         </ProductsSection>
       </article>
@@ -97,8 +92,22 @@ export default function Page() {
 }
 
 const ProductsSection = styled.section`
+  min-height: ${(p) => (p.$ready ? "auto" : "720px")};
+  content-visibility: auto;
+  contain-intrinsic-size: 720px;
+
+  @media (max-width: 600px) {
+    min-height: ${(p) => (p.$ready ? "auto" : "480px")};
+    contain-intrinsic-size: 480px;
+  }
+`;
+
+const ProductsPlaceholder = styled.div`
   width: 100%;
-  font-size: 0;
+  min-height: 480px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #ebe7df 0%, #e2ddd3 100%);
+  opacity: 0.65;
 `;
 
 const Hero = styled.header`
